@@ -1,0 +1,53 @@
+{
+    "name": "fourohfourborenomore",
+    "version": "0.0.1",
+    "description": "something to do on a 404 page",
+    "author": {
+        "name": "Jeremy Osborne",
+        "email": "jeremywosborne@gmail.com",
+        "url": "http://jeremyosborne.com"
+    },
+    "license": "UNLICENSED",
+    "scripts": {
+        "clean": "del dist/*",
+        "build": "npm run clean && BUILD_TYPE=production webpack",
+        "start": "webpack-dev-server --open `# Start is dev focused. Use npm run build to produce files suitable for hosting.`",
+        "prepare": "husky install"
+    },
+    "dependencies": {
+        "phaser": "3.70.0"
+    },
+    "devDependencies": {
+        "@tsconfig/node18": "^18.2.1",
+        "@types/node": "18.17.1",
+        "@types/webpack": "^5.28.5",
+        "copy-webpack-plugin": "^12.0.1",
+        "del-cli": "^5.1.0",
+        "dotenv-webpack": "^8.0.1",
+        "favicons": "^7.1.5",
+        "favicons-webpack-plugin": "^6.0.1",
+        "html-webpack-plugin": "^5.6.0",
+        "husky": "^8.0.3",
+        "lint-nvmrc-with-engines": "^0.1.2",
+        "lint-staged": "^15.2.0",
+        "prettier": "^3.1.0",
+        "ts-loader": "^9.5.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3",
+        "webpack": "^5.89.0",
+        "webpack-cli": "^5.1.4",
+        "webpack-dev-server": "^4.15.1"
+    },
+    "engines": {
+        "node": "=18.17.1"
+    },
+    "private": true,
+    "lint-staged": {
+        "*.{css,js,ts}": [
+            "prettier --write"
+        ],
+        "{.nvmrc,package.json}": [
+            "lint-nvmrc-with-engines"
+        ]
+    }
+}

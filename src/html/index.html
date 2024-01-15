@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>four oh four bore no more</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+            html,
+            body {
+                height: 100%;
+            }
+            .hidden {
+                display: none !important;
+            }
+        </style>
+        <link rel="stylesheet" href="normalize.min.css" />
+    </head>
+    <body>
+        <noscript
+            style="
+                color: white;
+                height: 100%;
+                background: black;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2rem;
+            "
+        >
+            <p style="margin: 0">
+                This game requires JavaScript. Please turn on JavaScript to play
+                the game.
+            </p>
+        </noscript>
+
+        <!-- 
+            Fake BIOS loading screen (begin) 
+
+            Plain HTML + CSS + JS loading screen.
+
+            Provides human visual appeasement (via spinning cursor) that 
+            something appears to be happening on the page, while the user 
+            might be waiting on a slow connection.
+
+            API:
+
+            - Component is designed to take up the real estate of the containing element,
+              which is presumed to be the full screen of the browser.
+            - This code should just work when added to an HTML page.
+            - When outside application is done loading, add the `loaded` class to the
+              `#pk-bios-loading` component.
+            - Visual portion of component hides itself on the addition of `loaded` and
+              then cleans up on next cycle of setTimeout queued function.
+        -->
+        <style id="pk-bios-loading-style">
+            #pk-bios-loading {
+                height: 100%;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: black;
+                box-sizing: border-box;
+            }
+            #pk-bios-loading .loaded {
+                display: none;
+            }
+            #pk-bios-loading-screen {
+                height: 100%;
+                min-height: 0;
+                max-height: 480px;
+                width: 100%;
+                min-width: 0;
+                max-width: 640px;
+                font-family:
+                    Courier New,
+                    monospace;
+                background-color: #0000aa;
+                color: #ffffff;
+                padding: 20px;
+                overflow-y: auto;
+                white-space: pre;
+                box-sizing: border-box;
+            }
+            #pk-bios-loading-screen .pk-bios-p {
+                margin: 0;
+                font-size: 14px;
+                line-height: 1.5;
+                box-sizing: border-box;
+            }
+        </style>
+        <div id="pk-bios-loading">
+            <div id="pk-bios-loading-screen">
+                <p class="pk-bios-p">Plague King BIOS Loaded</p>
+                <p class="pk-bios-p">
+                    Summoning 200s from the interwebs...<span
+                        id="pk-bios-loading-cursor"
+                        >|</span
+                    >
+                </p>
+            </div>
+        </div>
+        <script id="pk-bios-loading-script">
+            (function () {
+                // 0th index should be the next cursor displayed in the
+                // animation compared to the intial cursor in the span element.
+                const cursors = ["/", "-", "\\", "|"];
+                let cursorIndex = 0;
+                const cursorIndexRepeat = cursors.length;
+                const loadingCursor = document.getElementById(
+                    "pk-bios-loading-cursor",
+                );
+                const loadingContainer =
+                    document.getElementById("pk-bios-loading");
+                const animateOrCleanup = () => {
+                    loadingCursor.innerHTML =
+                        cursors[cursorIndex % cursorIndexRepeat];
+                    cursorIndex += 1;
+                    // Depends on external code "turning off" this loading screen by this method.
+                    if (!loadingContainer.classList.contains("loaded")) {
+                        setTimeout(animateOrCleanup, 100);
+                    } else {
+                        // Clean up after ourselves.
+                        loadingContainer.parentNode.removeChild(
+                            loadingContainer,
+                        );
+                        const loadingStyle = document.getElementById(
+                            "pk-bios-loading-style",
+                        );
+                        loadingStyle.parentNode.removeChild(loadingStyle);
+                        const loadingScript = document.getElementById(
+                            "pk-bios-loading-script",
+                        );
+                        loadingScript.parentNode.removeChild(loadingScript);
+                    }
+                };
+                setTimeout(animateOrCleanup, 100);
+            })();
+        </script>
+        <!-- Fake BIOS loading screen (end) -->
+
+        <div id="game-container" class="hidden" style="height: 100%"></div>
+    </body>
+</html>
