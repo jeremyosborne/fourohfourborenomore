@@ -2,9 +2,9 @@ import { AssetNames } from "../assets";
 import { Physics, Scene } from "phaser";
 
 /**
- * The purple dino is the main player.
+ * Obstacles fly at the player, and the player needs to dodge them.
  */
-export class Box
+export class Obstacle
     extends Physics.Arcade.Sprite
     implements IGameObjectLiveKill, IGameObjectSpawn, IGameObjectUpdate
 {

@@ -1,2 +1,2 @@
-export * from "./box";
+export * from "./obstacle";
 export * from "./player";
