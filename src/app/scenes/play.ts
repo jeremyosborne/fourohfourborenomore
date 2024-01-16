@@ -20,17 +20,19 @@ export class Play extends Scene {
             40,
             AssetNames.box,
         );
+        ground.setOrigin(0, 0);
         this.physics.add.existing(ground, true);
 
         this.player = new Player(this, 100, this.cameras.main.height - 60);
         this.player.spawn();
 
-        this.physics.add.collider(this.player, ground);
-
         this.boxes = this.physics.add.group({
             maxSize: 10,
             classType: Box,
+            runChildUpdate: true,
         });
+
+        this.physics.add.collider(this.player, ground);
         this.physics.add.collider(
             this.player,
             this.boxes,
@@ -39,9 +41,8 @@ export class Play extends Scene {
             this,
         );
 
-        // Spawn boxes at random intervals
         this.time.addEvent({
-            delay: 1000, // Spawn a box every 1000 milliseconds (1 second), adjust as needed
+            delay: 1000,
             callback: this.spawnBox,
             callbackScope: this,
             loop: true,
@@ -50,33 +51,25 @@ export class Play extends Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
-    update() {
+    update(gameTime: number, delta: number) {
         // Player jump
         if (this.cursors.space.isDown && this.player.body.touching.down) {
             this.player.setVelocityY(-250);
         }
 
-        for (const box of this.boxes.getChildren() as Array<Box>) {
-            if (box.body.position.x < -box) {
-                this.boxes.remove(box, true, true);
-                box.kill();
-            }
-            return;
-        }
+        this.boxes.preUpdate(gameTime, delta);
     }
 
     spawnBox() {
-        if (this.boxes.getLength() < 10) {
-            const height = Phaser.Math.Between(
+        if (this.boxes.countActive() < this.boxes.maxSize) {
+            // Spawn on the right side of the game at a random height.
+            const spawnX = this.cameras.main.width;
+            const spawnY = Phaser.Math.Between(
                 100,
                 this.cameras.main.height - 40,
             );
-            const box = this.boxes.create(
-                this.cameras.main.width,
-                height,
-                "ground",
-            );
-            box.setVelocityX(-200); // Adjust the speed as needed
+            const box = this.boxes.get() as Box;
+            box.spawn(spawnX, spawnY, -200);
         }
     }
 

@@ -6,13 +6,12 @@ import { Physics, Scene } from "phaser";
  */
 export class Box
     extends Physics.Arcade.Sprite
-    implements IGameObjectLiveKill, IGameObjectSpawn
+    implements IGameObjectLiveKill, IGameObjectSpawn, IGameObjectUpdate
 {
     constructor(scene: Scene, x = 0, y = 0) {
         super(scene, x, y, AssetNames.box);
         scene.add.existing(this);
         scene.physics.add.existing(this);
-        this.setGravityY(300);
         // Like most sprites, the player also starts off dead.
         this.kill();
     }
@@ -29,7 +28,16 @@ export class Box
         this.body.enable = false;
     }
 
-    spawn() {
+    spawn(x = 0, y = 0, speed = 200) {
         this.live();
+        this.setPosition(x, y);
+        this.setVelocityX(-1 * speed);
+    }
+
+    update() {
+        // Remove box from the left bounds of the game.
+        if (this.body.position.x < -this.width) {
+            this.kill();
+        }
     }
 }
