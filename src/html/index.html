@@ -141,6 +141,28 @@
         </script>
         <!-- Fake BIOS loading screen (end) -->
 
-        <div id="game-container" class="hidden" style="height: 100%"></div>
+        <style>
+            #game-positioner {
+                height: 100%;
+                width: 100%;
+
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+
+                background: black;
+            }
+            #game-container {
+                box-sizing: border-box;
+                width: 100%;
+                max-width: 800px;
+                height: 100%;
+                max-height: 300px;
+            }
+        </style>
+        <div id="game-positioner">
+            <div id="game-container" class="hidden"></div>
+        </div>
     </body>
 </html>

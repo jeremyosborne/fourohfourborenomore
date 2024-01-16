@@ -1,7 +1,7 @@
 import { AssetNames } from "../assets";
+import { Box, Player } from "../game-objects";
 import { GameObjects, Scene } from "phaser";
 import { sceneNames } from "./scene-names";
-import { Box, Player } from "../game-objects";
 
 export class Play extends Scene {
     player: Player;

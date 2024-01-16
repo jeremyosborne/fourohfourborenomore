@@ -7,11 +7,16 @@ import { config } from "./config";
 import { Game } from "phaser";
 import { AssetLoader, Play } from "./scenes";
 
+// Must equal the reference of our HTML game container.
+const GAME_CONTAINER_ID = "game-container";
+
 export const main = () => {
+    const gameContainer = document.getElementById(GAME_CONTAINER_ID);
     new Game({
-        // Idiomatic "full browser" sizing in Phaser3.
-        width: window.innerWidth,
-        height: window.innerHeight,
+        // Game will work within whatever container is supplied. It is the
+        // responsibility of the container provider to set appropriate dimensions.
+        width: gameContainer.clientWidth,
+        height: gameContainer.clientHeight,
 
         backgroundColor: "#000000",
 
