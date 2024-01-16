@@ -69,7 +69,7 @@ export class Play extends Scene {
                 this.cameras.main.height - 40,
             );
             const box = this.boxes.get() as Box;
-            box.spawn(spawnX, spawnY, -200);
+            box.spawn(spawnX, spawnY, 200);
         }
     }
 
