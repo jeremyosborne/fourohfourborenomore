@@ -1,6 +1,6 @@
 import { AssetNames } from "../assets";
 import { Box, Player } from "../game-objects";
-import { GameObjects, Scene } from "phaser";
+import { GameObjects, Math as PhaserMath, Scene } from "phaser";
 import { sceneNames } from "./scene-names";
 
 export class Play extends Scene {
@@ -41,12 +41,7 @@ export class Play extends Scene {
             this,
         );
 
-        this.time.addEvent({
-            delay: 1000,
-            callback: this.spawnBox,
-            callbackScope: this,
-            loop: true,
-        });
+        this.spawnBoxAddEvent();
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
@@ -60,6 +55,15 @@ export class Play extends Scene {
         this.boxes.preUpdate(gameTime, delta);
     }
 
+    spawnBoxAddEvent() {
+        this.time.addEvent({
+            delay: PhaserMath.Between(400, 1500),
+            callback: this.spawnBox,
+            callbackScope: this,
+            loop: false,
+        });
+    }
+
     spawnBox() {
         if (this.boxes.countActive() < this.boxes.maxSize) {
             // Spawn on the right side of the game at a random height.
@@ -70,6 +74,7 @@ export class Play extends Scene {
             );
             const box = this.boxes.get() as Box;
             box.spawn(spawnX, spawnY, 200);
+            this.spawnBoxAddEvent();
         }
     }
 

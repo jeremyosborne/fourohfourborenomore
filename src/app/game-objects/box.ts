@@ -31,6 +31,7 @@ export class Box
     spawn(x = 0, y = 0, speed = 200) {
         this.live();
         this.setPosition(x, y);
+        this.setVelocityY(0);
         this.setVelocityX(-1 * speed);
     }
 
