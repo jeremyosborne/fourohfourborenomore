@@ -36,7 +36,7 @@ export class Play extends Scene {
         this.physics.add.collider(
             this.player,
             this.boxes,
-            this.onPlayerHit,
+            this.collidePlayerBox,
             null,
             this,
         );
@@ -78,7 +78,7 @@ export class Play extends Scene {
         }
     }
 
-    onPlayerHit = (player, box) => {
+    collidePlayerBox = (player: Player, box: Box) => {
         console.log("Player hit by box!");
         // Add your logic here for when the player collides with the box
     };
