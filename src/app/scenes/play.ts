@@ -4,6 +4,7 @@ import { GameObjects, Math as PhaserMath, Scene, Types } from "phaser";
 import { sceneNames } from "./scene-names";
 
 export class Play extends Scene {
+    ceiling: GameObjects.TileSprite;
     cursors: Types.Input.Keyboard.CursorKeys;
     ground: GameObjects.TileSprite;
     obstacles: GameObjects.Group;
@@ -14,6 +15,16 @@ export class Play extends Scene {
     }
 
     create() {
+        this.ceiling = this.add.tileSprite(
+            0,
+            0,
+            this.cameras.main.width,
+            32,
+            AssetNames.spike,
+        );
+        this.ceiling.setOrigin(0, 0);
+        this.physics.add.existing(this.ceiling, true);
+
         this.ground = this.add.tileSprite(
             0,
             this.cameras.main.height - 20,
@@ -59,6 +70,7 @@ export class Play extends Scene {
         }
 
         // Player horizontal scrolling visual effect.
+        this.ceiling.tilePositionX += 2;
         this.ground.tilePositionX += 2;
 
         this.obstacles.preUpdate(gameTime, delta);

@@ -3,6 +3,7 @@ export enum AssetNames {
     "box" = "box",
     "ground" = "ground",
     "player" = "player",
+    "spike" = "spike",
 }
 
 /**
@@ -22,5 +23,9 @@ export const assetConfigs: Record<AssetNames, AssetLoaderConfig> = {
     player: {
         type: "image",
         url: "assets/images/player.png",
+    },
+    spike: {
+        type: "image",
+        url: "assets/images/spike.png",
     },
 } as const;
