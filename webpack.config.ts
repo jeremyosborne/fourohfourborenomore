@@ -101,12 +101,7 @@ const config: Configuration = {
             chunks: ["app", "vendors"],
         }),
         new FaviconsWebpackPlugin({
-            logo: path.join(
-                INPUT_STATIC_DIR,
-                "assets",
-                "images",
-                "purple-dino.png",
-            ),
+            logo: path.join(INPUT_STATIC_DIR, "assets", "images", "player.png"),
         }),
     ],
     resolve: {
