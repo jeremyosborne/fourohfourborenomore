@@ -1,14 +1,19 @@
 import { AssetNames } from "../assets";
 import { Obstacle, Player } from "../game-objects";
-import { GameObjects, Math as PhaserMath, Scene, Types } from "phaser";
+import { GameObjects, Math as PhaserMath, Physics, Scene, Types } from "phaser";
 import { sceneNames } from "./scene-names";
 
 export class Play extends Scene {
+    /** Video game logic/physics: the player can progress only so far in the X direction. */
+    barrierX: number;
     ceiling: GameObjects.TileSprite;
     cursors: Types.Input.Keyboard.CursorKeys;
     ground: GameObjects.TileSprite;
     obstacles: GameObjects.Group;
     player: Player;
+
+    /** Value used to move ceiling and ground tiles during every call to update. */
+    backgroundTileScrollXSpeed = 2;
 
     constructor() {
         super({ key: sceneNames.play });
@@ -35,6 +40,8 @@ export class Play extends Scene {
         this.ground.setOrigin(0, 0);
         this.physics.add.existing(this.ground, true);
 
+        this.barrierX = this.cameras.main.width * 0.3;
+
         this.player = new Player(this, 100, this.cameras.main.height - 60);
         this.player.spawn();
 
@@ -44,10 +51,18 @@ export class Play extends Scene {
             runChildUpdate: true,
         });
 
-        // Player can't go below the ground.
+        // Player can't go below the ground or through the ceiling.
         this.physics.add.collider(this.player, this.ground);
-        // Obstacles can bounce off the ground.
+        this.physics.add.collider(
+            this.player,
+            this.ceiling,
+            this.collidePlayerCeiling,
+            null,
+            this,
+        );
+        // Obstacles can't go through the ground or ceiling.
         this.physics.add.collider(this.obstacles, this.ground);
+        this.physics.add.collider(this.obstacles, this.ceiling);
         // Obstacles try to push the player out of the game bounds or into
         // a deadly obstacle.
         this.physics.add.collider(
@@ -58,26 +73,37 @@ export class Play extends Scene {
             this,
         );
 
-        this.addEventSpawnObstacle();
+        // Begin the obstacle spawning.
+        this.spawnObstacleAddEvent();
 
         this.cursors = this.input.keyboard.createCursorKeys();
     }
 
     update(gameTime: number, delta: number) {
-        // Player jump
-        if (this.cursors.space.isDown && this.player.body.touching.down) {
-            this.player.setVelocityY(-250);
+        // Player jump.
+        if (this.cursors.space.isDown) {
+            this.player.setVelocityY(-130);
+            this.player.setVelocityX(50);
+        }
+        // Player can only jump so far forward.
+        if (this.player.x > this.barrierX) {
+            this.player.setVelocityX(0);
+            this.player.x = this.barrierX;
         }
 
-        // Player horizontal scrolling visual effect.
-        this.ceiling.tilePositionX += 2;
-        this.ground.tilePositionX += 2;
+        // Background update provides a horizontal scrolling visual effect for the player.
+        this.ceiling.tilePositionX += this.backgroundTileScrollXSpeed;
+        this.ground.tilePositionX += this.backgroundTileScrollXSpeed;
 
         this.obstacles.preUpdate(gameTime, delta);
     }
 
-    /** Queue up a random addition of an obstacle. */
-    addEventSpawnObstacle() {
+    /**
+     * Queue up addition of an obstacle.
+     *
+     * @see spawnObstacle
+     */
+    spawnObstacleAddEvent() {
         this.time.addEvent({
             delay: PhaserMath.Between(400, 1500),
             callback: this.spawnObstacle,
@@ -86,6 +112,12 @@ export class Play extends Scene {
         });
     }
 
+    /**
+     * Hurls an obstacle at the player, and enqueues the
+     * next obstacle spawn.
+     *
+     * @see spawnObstacleAddEvent
+     */
     spawnObstacle() {
         // Add an obstacle if we don't have the maximum number of them
         // in the game and queue up the next call.
@@ -97,13 +129,16 @@ export class Play extends Scene {
                 this.cameras.main.height - 40,
             );
             const obstacle = this.obstacles.get() as Obstacle;
-            obstacle.spawn(spawnX, spawnY, 200);
+            obstacle.spawn(spawnX, spawnY, -200);
         }
-        this.addEventSpawnObstacle();
+        this.spawnObstacleAddEvent();
     }
 
+    collidePlayerCeiling = (player: Player, ceiling: Physics.Arcade.Sprite) => {
+        console.log("Player hit ceiling");
+    };
+
     collidePlayerObstacle = (player: Player, obstacle: Obstacle) => {
-        console.log("Player hit by box!");
-        // Add your logic here for when the player collides with the box
+        console.log("Player hit obstacle");
     };
 }

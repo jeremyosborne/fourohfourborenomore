@@ -28,11 +28,13 @@ export class Obstacle
         this.body.enable = false;
     }
 
-    spawn(x = 0, y = 0, speed = 200) {
+    spawn(x = 0, y = 0, speedX = -200) {
         this.live();
         this.setPosition(x, y);
+        this.setVelocityX(speedX);
+        // We want to start at 0 Y velocity, in case some other body
+        // previously collided with us and imparted a Y velocity onto us.
         this.setVelocityY(0);
-        this.setVelocityX(-1 * speed);
     }
 
     update() {
