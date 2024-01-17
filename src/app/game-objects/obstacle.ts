@@ -6,7 +6,7 @@ import { Physics, Scene } from "phaser";
  */
 export class Obstacle
     extends Physics.Arcade.Sprite
-    implements IGameObjectLiveKill, IGameObjectSpawn, IGameObjectUpdate
+    implements IGameObjectLiveKill, IGameObjectSpawn
 {
     constructor(scene: Scene, x = 0, y = 0) {
         super(scene, x, y, AssetNames.box);
@@ -35,12 +35,5 @@ export class Obstacle
         // We want to start at 0 Y velocity, in case some other body
         // previously collided with us and imparted a Y velocity onto us.
         this.setVelocityY(0);
-    }
-
-    update() {
-        // Remove box from the left bounds of the game.
-        if (this.body.position.x < -this.width) {
-            this.kill();
-        }
     }
 }

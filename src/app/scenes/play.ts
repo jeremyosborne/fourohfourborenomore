@@ -11,15 +11,29 @@ export class Play extends Scene {
     ground: GameObjects.TileSprite;
     obstacles: GameObjects.Group;
     player: Player;
+    /** Score counter. */
+    score: number = 0;
+    /** Score display. */
+    scoreText: GameObjects.Text;
 
     /** Value used to move ceiling and ground tiles during every call to update. */
-    backgroundTileScrollXSpeed = 2;
+    readonly backgroundTileScrollXSpeed = 2;
 
     constructor() {
         super({ key: sceneNames.play });
     }
 
     create() {
+        this.scoreText = this.add
+            // Position below the ceiling.
+            .text(5, 40, "", {
+                fontSize: "16px",
+                color: "#ffffff",
+            })
+            .setOrigin(0, 0);
+        // Sets the initial label, prevent duplicate strings.
+        this.scoreIncrement(0);
+
         this.ceiling = this.add.tileSprite(
             0,
             0,
@@ -95,7 +109,22 @@ export class Play extends Scene {
         this.ceiling.tilePositionX += this.backgroundTileScrollXSpeed;
         this.ground.tilePositionX += this.backgroundTileScrollXSpeed;
 
+        // Remove obstacles that have passed the left side of the screen.
         this.obstacles.preUpdate(gameTime, delta);
+        for (const obstacle of this.obstacles.getChildren() as Array<Obstacle>) {
+            if (obstacle.active && obstacle.body.position.x < -obstacle.width) {
+                obstacle.kill();
+                this.scoreIncrement(1);
+            }
+        }
+    }
+
+    /**
+     * Update the score as well as the display value.
+     */
+    scoreIncrement(value: number = 1) {
+        this.score += value;
+        this.scoreText.setText("Score: " + this.score);
     }
 
     /**
