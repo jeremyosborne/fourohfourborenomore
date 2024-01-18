@@ -1,4 +1,5 @@
 import { AssetNames } from "../assets";
+import { isOutOfBounds } from "../common";
 import { Obstacle, Player, Propulsion } from "../game-objects";
 import { GameObjects, Math as PhaserMath, Physics, Scene, Types } from "phaser";
 import { sceneNames } from "./scene-names";
@@ -18,6 +19,8 @@ export class Play extends Scene {
     score: number = 0;
     /** Score display. */
     scoreText: GameObjects.Text;
+    /** Has the first update been skipped? */
+    updateFirstSkipped: boolean = false;
 
     /** Value used to move ceiling and ground tiles during every call to update. */
     readonly backgroundTileScrollXSpeed = 2;
@@ -104,6 +107,12 @@ export class Play extends Scene {
     }
 
     update(gameTime: number, delta: number) {
+        // NOTE: there seems to be some setup of cameras, and potentially other things,
+        // during the first update of the game. So we skip the first update.
+        if (!this.updateFirstSkipped) {
+            this.updateFirstSkipped = true;
+            return;
+        }
         // Spacebar = player jump.
         if (
             this.cursors.space.isDown &&
@@ -147,10 +156,15 @@ export class Play extends Scene {
         // Remove obstacles that have passed the left side of the screen.
         this.obstacles.preUpdate(gameTime, delta);
         for (const obstacle of this.obstacles.getChildren() as Array<Obstacle>) {
-            if (obstacle.active && obstacle.body.position.x < -obstacle.width) {
+            if (obstacle.active && isOutOfBounds(this, obstacle)) {
                 obstacle.kill();
                 this.scoreIncrement(1);
             }
+        }
+
+        // Handle game over condition.
+        if (this.player.active && isOutOfBounds(this, this.player)) {
+            console.log("WIP... game over.");
         }
     }
 
