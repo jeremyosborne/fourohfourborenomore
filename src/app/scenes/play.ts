@@ -1,5 +1,5 @@
 import { AssetNames } from "../assets";
-import { Obstacle, Player } from "../game-objects";
+import { Obstacle, Player, Propulsion } from "../game-objects";
 import { GameObjects, Math as PhaserMath, Physics, Scene, Types } from "phaser";
 import { sceneNames } from "./scene-names";
 
@@ -11,6 +11,9 @@ export class Play extends Scene {
     ground: GameObjects.TileSprite;
     obstacles: GameObjects.Group;
     player: Player;
+    propulsions: GameObjects.Group;
+    /** If true, does not launch another propulsion, even if the player leans on the spacebar. */
+    propulsionCoolingDown: boolean = false;
     /** Score counter. */
     score: number = 0;
     /** Score display. */
@@ -60,8 +63,15 @@ export class Play extends Scene {
         this.player.spawn();
 
         this.obstacles = this.physics.add.group({
-            maxSize: 10,
             classType: Obstacle,
+            maxSize: 10,
+            runChildUpdate: true,
+        });
+
+        // Visual but non-interactive.
+        this.propulsions = this.add.group({
+            classType: Propulsion,
+            maxSize: 10,
             runChildUpdate: true,
         });
 
@@ -94,12 +104,34 @@ export class Play extends Scene {
     }
 
     update(gameTime: number, delta: number) {
-        // Player jump.
-        if (this.cursors.space.isDown) {
-            this.player.setVelocityY(-130);
-            this.player.setVelocityX(50);
+        // Spacebar = player jump.
+        if (
+            this.cursors.space.isDown &&
+            // Can't jump if our propulsion system is empty or we are cooling down
+            this.obstacles.countActive() < this.obstacles.maxSize &&
+            !this.propulsionCoolingDown
+        ) {
+            // Propulsion to launch the dinosaur should occur from its behind.
+            const propulsion = this.propulsions.get() as Propulsion;
+            // I thought the above check would work, but it appears not to,
+            // so we just add one more check in case null.
+            if (propulsion) {
+                this.player.setVelocityY(-130);
+                this.player.setVelocityX(50);
+                propulsion.spawn(
+                    this.player.body.x - 5,
+                    this.player.body.y + this.player.displayHeight - 5,
+                );
+                this.propulsionCoolingDown = true;
+                this.time.addEvent({
+                    delay: 400,
+                    callback: () => (this.propulsionCoolingDown = false),
+                    callbackScope: this,
+                    loop: false,
+                });
+            }
         }
-        // Player can only jump so far forward.
+        // Player can only jump so far forward (video game logic).
         if (this.player.x > this.barrierX) {
             this.player.setVelocityX(0);
             this.player.x = this.barrierX;
@@ -108,6 +140,9 @@ export class Play extends Scene {
         // Background update provides a horizontal scrolling visual effect for the player.
         this.ceiling.tilePositionX += this.backgroundTileScrollXSpeed;
         this.ground.tilePositionX += this.backgroundTileScrollXSpeed;
+
+        // Handle propulsion animation.
+        this.propulsions.preUpdate(gameTime, delta);
 
         // Remove obstacles that have passed the left side of the screen.
         this.obstacles.preUpdate(gameTime, delta);

@@ -1,0 +1,92 @@
+import { AssetNames } from "../assets";
+import { Display, GameObjects, Scene, Physics } from "phaser";
+
+/**
+ * Animated explosion of propulsion sprite.
+ *
+ * Does not collide or affect anything else.
+ */
+export class Propulsion
+    extends GameObjects.Sprite
+    implements IGameObjectLiveKill, IGameObjectSpawn, IGameObjectUpdate
+{
+    body: Physics.Arcade.Body;
+
+    mask: Display.Masks.GeometryMask;
+    /** Set when launched from the dinosaur, measured against current time to control how long this explosion is visible. */
+    birth: number | null;
+    /** Total time in ms an explosion is on screen. */
+    lifespanMax = 2000;
+    /** Half of the explosion life is expanding, half is contracting. */
+    lifespanHalf = this.lifespanMax / 2;
+    /** How many pixels big before we implode. */
+    maxSize = 30;
+
+    constructor(scene: Scene, x: number = 0, y: number = 0) {
+        super(scene, x, y, AssetNames.gasCloud);
+        scene.add.existing(this);
+
+        // Circular cut out of the image.
+        this.mask = this.scene.make
+            .graphics({
+                x,
+                y,
+            })
+            .beginPath()
+            .arc(0, 0, 28, 0, 2 * Math.PI)
+            .closePath()
+            .fillPath()
+            .createGeometryMask();
+        this.setMask(this.mask);
+        // Start off contracted, to fix glitchiness that I found when not initially scaled to 0.
+        this.mask.geometryMask.scale = 0;
+        this.scale = 0;
+        // Starts off "dead" and is managed by the caller.
+        this.kill();
+    }
+
+    live() {
+        this.setActive(true);
+        this.setVisible(true);
+    }
+
+    kill() {
+        this.setActive(false);
+        this.setVisible(false);
+    }
+
+    /**
+     * Create an explosion of propulsion.
+     *
+     * @param x game world horizontal point.
+     * @param y game world vertical point.
+     */
+    spawn(x: number, y: number) {
+        this.birth = this.scene.time.now;
+        // Circular cut out of the image.
+        // As noted, masks are not relative to a sprite, but are positioned
+        // in global space.
+        this.mask.geometryMask.setPosition(x, y);
+        this.setPosition(x, y);
+        this.live();
+    }
+
+    update(gameTime: number) {
+        const lifespan = gameTime - this.birth;
+        // Increase the size of the sprite.
+        let sizeRatio: number;
+        // Whether we are imploding or exploding.
+        if (lifespan > this.lifespanMax) {
+            this.kill();
+        } else if (lifespan > this.lifespanHalf) {
+            // Exploding.
+            sizeRatio = 1 - (lifespan - this.lifespanHalf) / this.lifespanHalf;
+        } else {
+            // Imploding.
+            sizeRatio = lifespan / this.lifespanHalf;
+        }
+        // Have to resize the mask along with the image itself.
+        this.mask.geometryMask.scale = sizeRatio;
+        this.scale = sizeRatio;
+    }
+}
