@@ -1,6 +1,7 @@
 /** Asset identifiers, passed to phaser to reference pre-loaded assets. */
 export enum AssetNames {
     "box" = "box",
+    "gasCloud" = "gasCloud",
     "ground" = "ground",
     "player" = "player",
     "spike" = "spike",
@@ -15,6 +16,10 @@ export const assetConfigs: Record<AssetNames, AssetLoaderConfig> = {
     box: {
         type: "image",
         url: "assets/images/box.png",
+    },
+    gasCloud: {
+        type: "image",
+        url: "assets/images/gas-cloud.png",
     },
     ground: {
         type: "image",
