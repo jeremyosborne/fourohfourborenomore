@@ -1,14 +1,12 @@
-import { Physics, Scene } from "phaser";
+import { Geom, Physics } from "phaser";
 
 /**
  * Whether or not a sprite has completely left the view.
  */
 export function isOutOfBounds(
-    scene: Scene,
+    bounds: Geom.Rectangle,
     sprite: Physics.Arcade.Sprite,
 ): boolean {
-    const bounds = scene.cameras.main.worldView;
-
     return (
         sprite.x - sprite.displayWidth < bounds.x ||
         sprite.y - sprite.displayHeight < bounds.y ||

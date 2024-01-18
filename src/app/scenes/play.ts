@@ -1,7 +1,14 @@
 import { AssetNames } from "../assets";
 import { isOutOfBounds } from "../common";
 import { Obstacle, Player, Propulsion } from "../game-objects";
-import { GameObjects, Math as PhaserMath, Physics, Scene, Types } from "phaser";
+import {
+    Cameras,
+    GameObjects,
+    Math as PhaserMath,
+    Physics,
+    Scene,
+    Types,
+} from "phaser";
 import { sceneNames } from "./scene-names";
 
 export class Play extends Scene {
@@ -19,8 +26,6 @@ export class Play extends Scene {
     score: number = 0;
     /** Score display. */
     scoreText: GameObjects.Text;
-    /** Has the first update been skipped? */
-    updateFirstSkipped: boolean = false;
 
     /** Value used to move ceiling and ground tiles during every call to update. */
     readonly backgroundTileScrollXSpeed = 2;
@@ -92,13 +97,7 @@ export class Play extends Scene {
         this.physics.add.collider(this.obstacles, this.ceiling);
         // Obstacles try to push the player out of the game bounds or into
         // a deadly obstacle.
-        this.physics.add.collider(
-            this.player,
-            this.obstacles,
-            this.collidePlayerObstacle,
-            null,
-            this,
-        );
+        this.physics.add.collider(this.player, this.obstacles);
 
         // Begin the obstacle spawning.
         this.spawnObstacleAddEvent();
@@ -107,12 +106,6 @@ export class Play extends Scene {
     }
 
     update(gameTime: number, delta: number) {
-        // NOTE: there seems to be some setup of cameras, and potentially other things,
-        // during the first update of the game. So we skip the first update.
-        if (!this.updateFirstSkipped) {
-            this.updateFirstSkipped = true;
-            return;
-        }
         // Spacebar = player jump.
         if (
             this.cursors.space.isDown &&
@@ -156,14 +149,20 @@ export class Play extends Scene {
         // Remove obstacles that have passed the left side of the screen.
         this.obstacles.preUpdate(gameTime, delta);
         for (const obstacle of this.obstacles.getChildren() as Array<Obstacle>) {
-            if (obstacle.active && isOutOfBounds(this, obstacle)) {
+            if (
+                obstacle.active &&
+                isOutOfBounds(this.physics.world.bounds, obstacle)
+            ) {
                 obstacle.kill();
                 this.scoreIncrement(1);
             }
         }
 
         // Handle game over condition.
-        if (this.player.active && isOutOfBounds(this, this.player)) {
+        if (
+            this.player.active &&
+            isOutOfBounds(this.physics.world.bounds, this.player)
+        ) {
             console.log("WIP... game over.");
         }
     }
@@ -213,10 +212,6 @@ export class Play extends Scene {
     }
 
     collidePlayerCeiling = (player: Player, ceiling: Physics.Arcade.Sprite) => {
-        console.log("Player hit ceiling");
-    };
-
-    collidePlayerObstacle = (player: Player, obstacle: Obstacle) => {
-        console.log("Player hit obstacle");
+        console.log("WIP game over...");
     };
 }
