@@ -1,14 +1,7 @@
 import { AssetNames } from "../assets";
 import { isOutOfBounds } from "../common";
 import { Obstacle, Player, Propulsion } from "../game-objects";
-import {
-    Cameras,
-    GameObjects,
-    Math as PhaserMath,
-    Physics,
-    Scene,
-    Types,
-} from "phaser";
+import { GameObjects, Math as PhaserMath, Physics, Scene, Types } from "phaser";
 import { sceneNames } from "./scene-names";
 
 export class Play extends Scene {
