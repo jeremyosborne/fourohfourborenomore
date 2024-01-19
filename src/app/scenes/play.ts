@@ -16,8 +16,12 @@ export class Play extends Scene {
     barrierX: number;
     ceiling: GameObjects.TileSprite;
     cursors: Types.Input.Keyboard.CursorKeys;
+    /** Which state the game is currently in. */
+    gameState: "play" | "player-killed" | "game-over" | "restart" = "play";
+    gameOverText: GameObjects.Text;
     ground: GameObjects.TileSprite;
     obstacles: GameObjects.Group;
+    particles: GameObjects.Particles.ParticleEmitter;
     player: Player;
     propulsions: GameObjects.Group;
     /** If true, does not launch another propulsion, even if the player leans on the spacebar. */
@@ -35,6 +39,19 @@ export class Play extends Scene {
     }
 
     create() {
+        this.particles = this.add.particles(0, 0, AssetNames.box, {
+            emitting: false,
+            gravityX: 0,
+            gravityY: 150,
+            lifespan: 2000,
+            quantity: 10,
+            rotate: { start: 0, end: 720 },
+            scale: { start: 1.0, end: 0 },
+            speed: 90,
+            tint: [0x942fcd],
+            tintFill: true,
+        });
+
         this.scoreText = this.add
             // Position below the ceiling.
             .text(5, 40, "", {
@@ -44,6 +61,21 @@ export class Play extends Scene {
             .setOrigin(0, 0);
         // Sets the initial label, prevent duplicate strings.
         this.scoreIncrement(0);
+
+        this.gameOverText = this.add
+            .text(
+                this.cameras.main.width / 2,
+                this.cameras.main.height / 2,
+                "Game Over\nhit spacebar to play again",
+                {
+                    align: "center",
+                    color: "#ffffff",
+                    fontSize: "16px",
+                },
+            )
+            .setOrigin(0.5, 0.5);
+        // Game over text is initial invisible.
+        this.gameOverText.setVisible(false);
 
         this.ceiling = this.add.tileSprite(
             0,
@@ -106,6 +138,30 @@ export class Play extends Scene {
     }
 
     update(gameTime: number, delta: number) {
+        if (this.gameState === "play") {
+            this.updatePlay(gameTime, delta);
+        } else if (this.gameState === "player-killed") {
+            this.updatePlayerKilled(gameTime, delta);
+        } else if (this.gameState === "game-over") {
+            this.updateGameOver(gameTime, delta);
+        } else if (this.gameState === "restart") {
+            this.updateRestart(gameTime, delta);
+        }
+    }
+
+    /**
+     * Instruct the player on what to do during game over.
+     */
+    updateGameOver(gameTime: number, delta: number) {
+        if (this.cursors.space.isDown) {
+            this.gameState = "restart";
+        }
+    }
+
+    /**
+     * Normal game state, until the player is killed.
+     */
+    updatePlay(gameTime: number, delta: number) {
         // Spacebar = player jump.
         if (
             this.cursors.space.isDown &&
@@ -163,8 +219,42 @@ export class Play extends Scene {
             this.player.active &&
             isOutOfBounds(this.physics.world.bounds, this.player)
         ) {
-            console.log("WIP... game over.");
+            this.gameState = "player-killed";
         }
+    }
+
+    /**
+     * Transition from play state to game over state.
+     */
+    updatePlayerKilled(gameTime: number, delta: number) {
+        this.player.kill();
+        // Have all of the obstacles drop to the ground.
+        for (const obstacle of this.obstacles.getChildren() as Array<Obstacle>) {
+            if (obstacle.active) {
+                obstacle.setVelocity(0, 250);
+            }
+        }
+        this.gameOverText.setVisible(true);
+        this.gameState = "game-over";
+    }
+
+    /**
+     * Resets the game to an initial state for replay.
+     */
+    updateRestart(gameTime: number, delta: number) {
+        // Reset the player.
+        this.player.setPosition(100, this.cameras.main.height - 60);
+        this.player.setVelocity(0, 0);
+        this.player.spawn();
+        // Reset the obstacles.
+        for (const obstacle of this.obstacles.getChildren() as Array<Obstacle>) {
+            obstacle.kill();
+        }
+        // Hide the game over text.
+        this.gameOverText.setVisible(false);
+        // Restart the obstacle spawning.
+        this.spawnObstacle();
+        this.gameState = "play";
     }
 
     /**
@@ -196,22 +286,32 @@ export class Play extends Scene {
      * @see spawnObstacleAddEvent
      */
     spawnObstacle() {
-        // Add an obstacle if we don't have the maximum number of them
-        // in the game and queue up the next call.
-        if (this.obstacles.countActive() < this.obstacles.maxSize) {
-            // Spawn on the right side of the game at a random height.
-            const spawnX = this.cameras.main.width;
-            const spawnY = Phaser.Math.Between(
-                100,
-                this.cameras.main.height - 40,
-            );
-            const obstacle = this.obstacles.get() as Obstacle;
-            obstacle.spawn(spawnX, spawnY, -200);
+        if (this.gameState === "play") {
+            // Add an obstacle if we don't have the maximum number of them
+            // in the game and queue up the next call.
+            if (this.obstacles.countActive() < this.obstacles.maxSize) {
+                // Spawn on the right side of the game at a random height.
+                const spawnX = this.cameras.main.width;
+                const spawnY = Phaser.Math.Between(
+                    100,
+                    this.cameras.main.height - 40,
+                );
+                const obstacle = this.obstacles.get() as Obstacle;
+                obstacle.spawn(spawnX, spawnY, -200);
+            }
+            this.spawnObstacleAddEvent();
         }
-        this.spawnObstacleAddEvent();
     }
 
     collidePlayerCeiling = (player: Player, ceiling: Physics.Arcade.Sprite) => {
-        console.log("WIP game over...");
+        // Player disappears when killed, but since still on screen we want
+        // a visual explosion.
+        this.particles.emitParticleAt(
+            this.player.body.x,
+            this.player.body.y,
+            15,
+        );
+
+        this.gameState = "player-killed";
     };
 }
