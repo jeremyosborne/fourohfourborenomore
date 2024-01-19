@@ -167,7 +167,7 @@ export class Play extends Scene {
             // I thought the above check would work, but it appears not to,
             // so we just add one more check in case null.
             if (propulsion) {
-                this.player.setVelocityY(-130);
+                this.player.setVelocityY(-230);
                 this.player.setVelocityX(50);
                 propulsion.spawn(
                     this.player.body.x - 5,
