@@ -12,6 +12,8 @@ export class Play extends Scene {
     /** Which state the game is currently in. */
     gameState: "play" | "player-killed" | "game-over" | "restart" = "play";
     gameOverText: GameObjects.Text;
+    /** The time at which the game is marked as over. Used for tap throttling. */
+    gameOverAt: number;
     ground: GameObjects.TileSprite;
     obstacles: GameObjects.Group;
     particles: GameObjects.Particles.ParticleEmitter;
@@ -146,7 +148,8 @@ export class Play extends Scene {
      * Instruct the player on what to do during game over.
      */
     updateGameOver(gameTime: number, delta: number) {
-        if (this.cursors.space.isDown) {
+        // Prevent spacebar spamming from instant reset.
+        if (this.cursors.space.isDown && gameTime - this.gameOverAt > 500) {
             this.gameState = "restart";
         }
     }
@@ -228,6 +231,7 @@ export class Play extends Scene {
             }
         }
         this.gameOverText.setVisible(true);
+        this.gameOverAt = gameTime;
         this.gameState = "game-over";
     }
 
