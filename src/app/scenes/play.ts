@@ -213,7 +213,9 @@ export class Play extends Scene {
         // Handle game over condition.
         if (
             this.player.active &&
-            isOutOfBounds(this.physics.world.bounds, this.player)
+            // The dinosaur must be pushed entirely out of bounds.
+            this.physics.world.bounds.x >
+                this.player.x + this.player.displayWidth
         ) {
             this.gameState = "player-killed";
         }
@@ -250,7 +252,6 @@ export class Play extends Scene {
         // Hide the game over text.
         this.gameOverText.setVisible(false);
         // Restart the obstacle spawning.
-        this.spawnObstacle();
         this.gameState = "play";
     }
 
@@ -286,6 +287,7 @@ export class Play extends Scene {
         if (this.gameState === "play") {
             // Add an obstacle if we don't have the maximum number of them
             // in the game and queue up the next call.
+            console.log("spawnObstacle:", this.obstacles.countActive());
             if (this.obstacles.countActive() < this.obstacles.maxSize) {
                 // Spawn on the right side of the game at a random height.
                 const spawnX = this.cameras.main.width;
@@ -296,8 +298,8 @@ export class Play extends Scene {
                 const obstacle = this.obstacles.get() as Obstacle;
                 obstacle.spawn(spawnX, spawnY, -200);
             }
-            this.spawnObstacleAddEvent();
         }
+        this.spawnObstacleAddEvent();
     }
 
     collidePlayerCeiling = (player: Player, ceiling: Physics.Arcade.Sprite) => {
