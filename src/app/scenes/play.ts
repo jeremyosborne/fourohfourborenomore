@@ -251,6 +251,9 @@ export class Play extends Scene {
         }
         // Hide the game over text.
         this.gameOverText.setVisible(false);
+        // Hero to zero.
+        this.score = 0;
+        this.scoreText.setText("Score: " + this.score);
         // Restart the obstacle spawning.
         this.gameState = "play";
     }
@@ -287,7 +290,6 @@ export class Play extends Scene {
         if (this.gameState === "play") {
             // Add an obstacle if we don't have the maximum number of them
             // in the game and queue up the next call.
-            console.log("spawnObstacle:", this.obstacles.countActive());
             if (this.obstacles.countActive() < this.obstacles.maxSize) {
                 // Spawn on the right side of the game at a random height.
                 const spawnX = this.cameras.main.width;
