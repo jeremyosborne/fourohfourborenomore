@@ -148,8 +148,11 @@ export class Play extends Scene {
      * Instruct the player on what to do during game over.
      */
     updateGameOver(gameTime: number, delta: number) {
-        // Prevent spacebar spamming from instant reset.
-        if (this.cursors.space.isDown && gameTime - this.gameOverAt > 500) {
+        // Prevent spacebar/tap spamming from instant reset.
+        if (
+            (this.cursors.space.isDown || this.input.activePointer.isDown) &&
+            gameTime - this.gameOverAt > 500
+        ) {
             this.gameState = "restart";
         }
     }
@@ -158,9 +161,9 @@ export class Play extends Scene {
      * Normal game state, until the player is killed.
      */
     updatePlay(gameTime: number, delta: number) {
-        // Spacebar = player jump.
+        // spacebar/tap = player jump.
         if (
-            this.cursors.space.isDown &&
+            (this.cursors.space.isDown || this.input.activePointer.isDown) &&
             // Can't jump if our propulsion system is empty or we are cooling down
             this.obstacles.countActive() < this.obstacles.maxSize &&
             !this.propulsionCoolingDown
