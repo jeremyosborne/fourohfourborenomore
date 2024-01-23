@@ -3,6 +3,7 @@ export enum AssetNames {
     "box" = "box",
     "gasCloud" = "gasCloud",
     "ground" = "ground",
+    "pig" = "pig",
     "player" = "player",
     "spike" = "spike",
 }
@@ -24,6 +25,10 @@ export const assetConfigs: Record<AssetNames, AssetLoaderConfig> = {
     ground: {
         type: "image",
         url: "assets/images/ground.png",
+    },
+    pig: {
+        type: "image",
+        url: "assets/images/pig.png",
     },
     player: {
         type: "image",

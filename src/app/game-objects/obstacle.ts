@@ -9,9 +9,11 @@ export class Obstacle
     implements IGameObjectLiveKill, IGameObjectSpawn
 {
     constructor(scene: Scene, x = 0, y = 0) {
-        super(scene, x, y, AssetNames.box);
+        super(scene, x, y, AssetNames.pig);
         scene.add.existing(this);
         scene.physics.add.existing(this);
+        // Shrink the body size to make collisions a bit more forgiving.
+        this.body.setSize(this.width - 8, this.height - 8);
         // Like most sprites, the player also starts off dead.
         this.kill();
     }
